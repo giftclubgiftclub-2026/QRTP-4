@@ -124,7 +124,7 @@
                 const { data, error } = await client
                     .from(PASSPORTS_TABLE)
                     .select('*')
-                    .eq('qrtp4_id', id)
+                    .eq('id', id)
                     .single();
 
                 if (error) {
@@ -142,7 +142,7 @@
                     const infoDiv = document.getElementById('info');
                     infoDiv.style.display = 'block';
                     infoDiv.innerHTML = `
-                        <strong>Passport ID:</strong> ${data.qrtp4_id}<br>
+                        <strong>Passport ID:</strong> ${data.id}<br>
                         <strong>Holder:</strong> ${data.holder_name || 'N/A'}<br>
                         <strong>Created:</strong> ${new Date(data.created_at).toLocaleString()}
                     `;
