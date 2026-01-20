@@ -114,8 +114,8 @@
       const waBtn = document.getElementById('wa');
       const issueMsg = document.getElementById('issueMsg');
 
-      const SUPABASE_URL = (window.QRTP4 && window.QRTP4.SUPABASE_URL) || '';
-      const SUPABASE_ANON_KEY = (window.QRTP4 && window.QRTP4.SUPABASE_ANON_KEY) || '';
+      const SUPABASE_URL = (window.QRTP4_CONFIG && window.QRTP4_CONFIG.SUPABASE_URL) || '';
+      const SUPABASE_ANON_KEY = (window.QRTP4_CONFIG && window.QRTP4_CONFIG.SUPABASE_ANON_KEY) || '';
       const issueEndpoint = 'https://aaczdhxzzsvrvwbfgvst.supabase.co/functions/v1/issue_basic';
 
       issueBtn.onclick = async () => {
