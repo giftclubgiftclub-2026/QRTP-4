@@ -67,6 +67,8 @@
             font-weight: 500;
         }
         .back-link:hover { text-decoration: underline; }
+            .hint { font-size: 14px; color: #64748b; margin-top: 8px; }
+            .row { display: flex; gap: 12px; }
     </style>
 </head>
 <body>
@@ -75,6 +77,12 @@
         <div id="passport-id" class="passport-id">Loading...</div>
         <div id="status" class="status loading">Checking registry...</div>
         <div id="info" class="info" style="display:none;"></div>
+            <div id="issueStatus" class="hint" style="margin-top:8px"></div>
+
+            <div class="row" id="issueActions" style="margin-top:12px; display:none">
+                      <button onclick="location.href='../buy/'">Go to BUY</button>
+                      <button id="copyReqP">Copy Issuance Request</button>
+                    </div>
         <a href="../" class="back-link">&larr; Back to Registry</a>
     </div>
 
@@ -147,6 +155,36 @@
                         <strong>Created:</strong> ${new Date(data.created_at).toLocaleString()}
                     `;
                 }
+
+                      // Issue status logic
+                      const issueStatus = document.getElementById('issueStatus');
+                      const issueActions = document.getElementById('issueActions');
+                      const copyReqP = document.getElementById('copyReqP');
+
+                      if (data) {
+                                  issueStatus.innerHTML = '✅ Issued (VERIFIED) — Registry record exists.';
+                                } else {
+                                  issueStatus.innerHTML = '⚠️ Not issued yet — ID generated, but not recorded in registry.';
+                                  issueActions.style.display = 'flex';
+
+                                  if (copyReqP) {
+                                                copyReqP.onclick = async () => {
+                                                                const link = location.origin + location.pathname + '?id=' + encodeURIComponent(id);
+                                                                const msg =
+                                                                                  'QRTP-4 BASIC ISSUANCE REQUEST\n' +
+                                                                                  'ID: ' + id + '\n' +
+                                                                                  'Link: ' + link + '\n' +
+                                                                                  'If paid: paste TXID in message.\n';
+
+                                                                try {
+                                                                                  await navigator.clipboard.writeText(msg);
+                                                                                  copyReqP.textContent = 'Request copied ✅';
+                                                                                } catch (e) {
+                                                                                  copyReqP.textContent = 'Copy failed ⚠️';
+                                                                                }
+                                                              };
+                                              }
+                                }
             } catch (err) {
                 document.getElementById('status').className = 'status error';
                 document.getElementById('status').innerHTML = '❌ ERROR<br><small>' + err.message + '</small>';
