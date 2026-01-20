@@ -52,6 +52,22 @@
       Link: <span id="plink"></span>
     </div>
 
+        <div style="margin-top:12px">
+                <div class="badge">Delivery</div>
+                <div class="hint" style="margin-top:8px">
+                          Enter your email to issue the passport and receive the verification link.
+                        </div>
+
+                <div class="row" style="margin-top:10px">
+                          <input id="email" type="email" placeholder="name@email.com"
+                                      style="flex:1;min-width:220px;border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-weight:700" />
+                          <button id="issue">Issue & Send to Email</button>
+                          <button id="wa">Share via WhatsApp</button>
+                        </div>
+
+                <div id="issueMsg" class="hint" style="margin-top:10px"></div>
+              </div>
+
     <div class="row">
       <button id="copy">Copy Link</button>
       <button class="btn2" id="open">Open Passport</button>
@@ -65,7 +81,8 @@
 
 </div>
 
-<script>
+  <script src="../config.js"></script>
+    <script>
   function pad6(n){ return String(n).padStart(6,"0"); }
 
   function generateId(){
@@ -90,6 +107,58 @@
     pid.textContent = id;
     plink.innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
     out.style.display = "block";
+
+      // Email & Issue logic
+      const emailEl = document.getElementById('email');
+      const issueBtn = document.getElementById('issue');
+      const waBtn = document.getElementById('wa');
+      const issueMsg = document.getElementById('issueMsg');
+
+      const SUPABASE_URL = (window.QRTP4 && window.QRTP4.SUPABASE_URL) || '';
+      const SUPABASE_ANON_KEY = (window.QRTP4 && window.QRTP4.SUPABASE_ANON_KEY) || '';
+      const issueEndpoint = 'https://aaczdhxzzsvrvwbfgvst.supabase.co/functions/v1/issue_basic';
+
+      issueBtn.onclick = async () => {
+            const email = (emailEl.value || '').trim().toLowerCase();
+            if (!email || !email.includes('@')) {
+                    issueMsg.textContent = '⚠️ Please enter a valid email.';
+                    return;
+                  }
+            if (!SUPABASE_ANON_KEY) {
+                    issueMsg.textContent = '❌ CONFIG MISSING: SUPABASE_ANON_KEY not found in config.js';
+                    return;
+                  }
+
+            issueBtn.textContent = 'Sending…';
+            issueBtn.disabled = true;
+
+            try {
+                    const resp = await fetch(issueEndpoint, {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY, 'apikey': SUPABASE_ANON_KEY },
+                              body: JSON.stringify({ email, id })
+                                      });
+
+                    const data = await resp.json().catch(() => ({}));
+
+                    if (!resp.ok) {
+                              issueMsg.textContent = '❌ Issuance failed: ' + (data.error || resp.statusText);
+                            } else {
+                              issueMsg.textContent = '✅ Issued & sent. Check your inbox. Verification link: ' + (data.verifyLink || url);
+                            }
+                  } catch (e) {
+                    issueMsg.textContent = '❌ Network error. Please try again.';
+                  } finally {
+                    issueBtn.textContent = 'Issue & Send to Email';
+                    issueBtn.disabled = false;
+                  }
+          };
+
+      waBtn.onclick = () => {
+            const msg = `QRTP-4 Passport ${id}\nVerify: ${url}\nQRTP-4 Global Standard`;
+            const wa = 'https://wa.me/?text=' + encodeURIComponent(msg);
+            window.open(wa, '_blank');
+          };
 
     copy.onclick = async () => {
       try{
